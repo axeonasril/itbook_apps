@@ -56,29 +56,33 @@ class _BookListPageState extends State<BookListPage> {
                         ),
                       ));
                     },
-                    child: Row(
-                      children: [
-                        Image.network(
-                          currentBook.image!,
-                          height: 100,
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(currentBook.title!),
-                                Text(currentBook.subtitle!),
-                                Align(
-                                    alignment: Alignment.topRight,
-                                    child: Text(currentBook.price!))
-                              ],
+                    child: Card(
+                      elevation: 5,
+                      margin: EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Image.network(
+                            currentBook.image!,
+                            height: 100,
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(currentBook.title!),
+                                  Text(currentBook.subtitle!),
+                                  Align(
+                                      alignment: Alignment.topRight,
+                                      child: Text(currentBook.price!))
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
