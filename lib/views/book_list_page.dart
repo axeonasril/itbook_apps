@@ -1,7 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:tugas2_bootcamp/controllers/book_controller.dart';
 import 'package:tugas2_bootcamp/models/book_list_response.dart';
 import 'package:tugas2_bootcamp/views/detail_book_page.dart';
 
@@ -13,24 +14,13 @@ class BookListPage extends StatefulWidget {
 }
 
 class _BookListPageState extends State<BookListPage> {
-  BookListResponse? bookList;
-  fetchBookApi() async {
-    var url = Uri.parse('https://api.itbook.store/1.0/new');
-    var response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      final jsonBookList = jsonDecode(response.body);
-      bookList = BookListResponse.fromJson(jsonBookList);
-      setState(() {});
-    }
-
-    // print(await http.read(Uri.https('example.com', 'foobar.txt')));
-  }
-
+  BookController? bookController;
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    fetchBookApi();
+    bookController = Provider.of<BookController>(context, listen: false);
+    bookController!.fetchBookApi();
   }
 
   @override
@@ -40,53 +30,77 @@ class _BookListPageState extends State<BookListPage> {
         title: const Text("Book Catalogue"),
         centerTitle: true,
       ),
-      body: Container(
-        child: bookList == null
-            ? const Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: bookList!.books!.length,
-                itemBuilder: (context, index) {
-                  final currentBook = bookList!.books![index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => DetailBookPage(
-                          isbn: currentBook.isbn13!,
-                        ),
-                      ));
-                    },
-                    child: Card(
-                      elevation: 5,
-                      margin: EdgeInsets.all(10),
-                      child: Row(
-                        children: [
-                          Image.network(
-                            currentBook.image!,
-                            height: 100,
+      body: Consumer<BookController>(
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+        builder: (context, controller, child) => Container(
+          child: bookController!.bookList == null
+              ? child
+              : ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: bookController!.bookList!.books!.length,
+                  itemBuilder: (context, index) {
+                    final currentBook = bookController!.bookList!.books![index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => DetailBookPage(
+                            isbn: currentBook.isbn13!,
                           ),
-                          Expanded(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(currentBook.title!),
-                                  Text(currentBook.subtitle!),
-                                  Align(
+                        ));
+                      },
+                      child: Card(
+                        elevation: 5,
+                        margin: EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Image.network(
+                              currentBook.image!,
+                              height: 100,
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      currentBook.title!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                    Text(
+                                      currentBook.subtitle!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Align(
                                       alignment: Alignment.topRight,
-                                      child: Text(currentBook.price!))
-                                ],
+                                      child: Text(
+                                        currentBook.price!,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }

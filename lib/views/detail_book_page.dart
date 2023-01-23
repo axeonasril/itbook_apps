@@ -1,5 +1,6 @@
-// ignore_for_file: avoid_print
-
+import 'package:provider/provider.dart';
+import 'package:tugas2_bootcamp/controllers/book_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -19,41 +20,12 @@ class DetailBookPage extends StatefulWidget {
 }
 
 class _DetailBookPageState extends State<DetailBookPage> {
-  BookDetailResponse? detailBook;
-  fetchDetailBookApi() async {
-    print(widget.isbn);
-    var url = Uri.parse('https://api.itbook.store/1.0/books/${widget.isbn}');
-    // ignore: unused_local_variable
-    var response = await http.get(url);
-
-    // print(await http.read(Uri.https('example.com', 'foobar.txt')));
-    if (response.statusCode == 200) {
-      final jsonDetail = jsonDecode(response.body);
-      detailBook = BookDetailResponse.fromJson(jsonDetail);
-      setState(() {});
-      fetchSimiliarBookApi(detailBook!.title!);
-    }
-  }
-
-  BookListResponse? similiarBooks;
-  fetchSimiliarBookApi(String title) async {
-    print(widget.isbn);
-    var url = Uri.parse('https://api.itbook.store/1.0/search/${title}');
-    // ignore: unused_local_variable
-    var response = await http.get(url);
-
-    // print(await http.read(Uri.https('example.com', 'foobar.txt')));
-    if (response.statusCode == 200) {
-      final jsonDetail = jsonDecode(response.body);
-      similiarBooks = BookListResponse.fromJson(jsonDetail);
-      setState(() {});
-    }
-  }
-
+  BookController? controller;
   @override
   void initState() {
     super.initState();
-    fetchDetailBookApi();
+    controller = Provider.of<BookController>(context, listen: false);
+    controller!.fetchDetailBookApi(widget.isbn);
   }
 
   @override
@@ -63,157 +35,183 @@ class _DetailBookPageState extends State<DetailBookPage> {
         title: const Text("Detail Book"),
         centerTitle: true,
       ),
-      body: detailBook == null
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ImageViewScreen(imageUrl: detailBook!.image!),
-                            ),
-                          );
-                        },
-                        child: Image.network(
-                          detailBook!.image!,
-                          height: 150,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 12.0,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                detailBook!.title!,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                detailBook!.authors!,
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.grey),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                children: List.generate(
-                                  5,
-                                  (index) => Icon(
-                                    Icons.star,
-                                    color:
-                                        index < int.parse(detailBook!.rating!)
-                                            ? Colors.yellow
-                                            : Colors.grey,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                detailBook!.subtitle!,
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                detailBook!.price!,
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  Container(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(),
-                      onPressed: () {},
-                      child: const Text("BUY"),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(detailBook!.desc!),
-                  const SizedBox(
-                    height: 10,
-                  ),
+      body: Consumer<BookController>(builder: (context, controller, child) {
+        return controller.detailBook == null
+            ? const Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: ListView(children: [
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text("Year: ${detailBook!.year!}"),
-                      Text(detailBook!.isbn13!),
-                      Text("${detailBook!.pages!} Pages"),
-                      Text("Publisher: ${detailBook!.publisher!}"),
-                      Text("Language: ${detailBook!.language!}"),
-
-                      // Text(detailBook!.rating!),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Divider(),
-                  similiarBooks == null
-                      ? CircularProgressIndicator()
-                      : Container(
-                          height: 130,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: similiarBooks!.books!.length,
-                            physics: BouncingScrollPhysics(),
-                            itemBuilder: ((context, index) {
-                              final current = similiarBooks!.books![index];
-                              return Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                width: 140,
-                                child: Card(
-                                  elevation: 4,
-                                  child: Column(
-                                    children: [
-                                      Image.network(
-                                        current.image!,
-                                        height: 100,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      Text(
-                                        current.title!,
-                                        maxLines: 1,
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ImageViewScreen(
+                                      imageUrl: controller.detailBook!.image!),
                                 ),
                               );
-                            }),
+                            },
+                            child: Image.network(
+                              controller.detailBook!.image!,
+                              height: 150,
+                              fit: BoxFit.cover,
+                            ),
                           ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 12.0,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    controller.detailBook!.title!,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    controller.detailBook!.authors!,
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey),
+                                  ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    children: List.generate(
+                                      5,
+                                      (index) => Icon(
+                                        Icons.star,
+                                        color: index <
+                                                int.parse(controller
+                                                    .detailBook!.rating!)
+                                            ? Colors.yellow
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    controller.detailBook!.subtitle!,
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    controller.detailBook!.price!,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(),
+                          onPressed: () async {
+                            print("url");
+                            Uri uri = Uri.parse(controller.detailBook!.url!);
+                            try {
+                              (await canLaunchUrl(uri))
+                                  ? launchUrl(uri)
+                                  : print("Gagal Navigasi");
+                            } catch (e) {
+                              print("error");
+                              print(e);
+                            }
+                          },
+                          child: const Text("BUY"),
                         ),
-                ],
-              ),
-            ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(controller.detailBook!.desc!),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text("Year: ${controller.detailBook!.year!}"),
+                          Text(controller.detailBook!.isbn13!),
+                          Text("${controller.detailBook!.pages!} Pages"),
+                          Text(
+                              "Publisher: ${controller.detailBook!.publisher!}"),
+                          Text("Language: ${controller.detailBook!.language!}"),
+
+                          // Text(detailBook!.rating!),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Divider(),
+                      controller.similiarBooks == null
+                          ? CircularProgressIndicator()
+                          : Container(
+                              height: 150,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    controller.similiarBooks!.books!.length,
+                                physics: BouncingScrollPhysics(),
+                                itemBuilder: ((context, index) {
+                                  final current =
+                                      controller.similiarBooks!.books![index];
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    width: 150,
+                                    child: Card(
+                                      elevation: 4,
+                                      child: Column(
+                                        children: [
+                                          Image.network(
+                                            current.image!,
+                                            height: 100,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10),
+                                            child: Text(
+                                              current.title!,
+                                              maxLines: 2,
+                                              textAlign: TextAlign.center,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ),
+                    ],
+                  ),
+                ]),
+              );
+      }),
     );
   }
 }
