@@ -8,14 +8,36 @@ class ImageViewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-          child: Stack(
-        children: [
-          Image.network(
-            imageUrl,
-          ),
-          BackButton(),
-        ],
-      )),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(5),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Positioned(
+              left: 50,
+              top: 200,
+              child: Column(
+                children: [
+                  Image.network(
+                    imageUrl,
+                  ),
+                ],
+              ),
+            ),
+            const BackButton()
+          ],
+        ),
+      ),
     );
   }
 }

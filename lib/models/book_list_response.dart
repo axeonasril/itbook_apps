@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_this
+
 
 class BookListResponse {
   String? error;
@@ -19,7 +19,7 @@ class BookListResponse {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data['error'] = error;
     data['total'] = total;
     if (books != null) {
@@ -55,13 +55,13 @@ class Books {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['title'] = this.title;
-    data['subtitle'] = this.subtitle;
-    data['isbn13'] = this.isbn13;
-    data['price'] = this.price;
-    data['image'] = this.image;
-    data['url'] = this.url;
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['title'] = title;
+    data['subtitle'] = subtitle;
+    data['isbn13'] = isbn13;
+    data['price'] = price;
+    data['image'] = image;
+    data['url'] = url;
     return data;
   }
 }

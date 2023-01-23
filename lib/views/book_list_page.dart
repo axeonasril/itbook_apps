@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:tugas2_bootcamp/controllers/book_controller.dart';
-import 'package:tugas2_bootcamp/models/book_list_response.dart';
 import 'package:tugas2_bootcamp/views/detail_book_page.dart';
 
 class BookListPage extends StatefulWidget {
@@ -17,7 +14,6 @@ class _BookListPageState extends State<BookListPage> {
   BookController? bookController;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     bookController = Provider.of<BookController>(context, listen: false);
     bookController!.fetchBookApi();
@@ -27,8 +23,13 @@ class _BookListPageState extends State<BookListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Book Catalogue"),
+        backgroundColor: Colors.blue[800],
         centerTitle: true,
+        title: const Text(
+          "BOOK CATALOGUE",
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+        ),
+        elevation: 0,
       ),
       body: Consumer<BookController>(
         child: const Center(
@@ -42,17 +43,23 @@ class _BookListPageState extends State<BookListPage> {
                   itemCount: bookController!.bookList!.books!.length,
                   itemBuilder: (context, index) {
                     final currentBook = bookController!.bookList!.books![index];
-                    return GestureDetector(
+                    return InkWell(
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => DetailBookPage(
-                            isbn: currentBook.isbn13!,
-                          ),
-                        ));
+                        Navigator.of(context)
+                            .push(
+                              MaterialPageRoute(
+                                builder: (context) => DetailBookPage(
+                                  isbn: currentBook.isbn13!,
+                                ),
+                              ),
+                            )
+                            .then(
+                              (_) => setState(() {}),
+                            );
                       },
                       child: Card(
                         elevation: 5,
-                        margin: EdgeInsets.all(10),
+                        margin: const EdgeInsets.all(10),
                         child: Row(
                           children: [
                             Image.network(
@@ -70,7 +77,7 @@ class _BookListPageState extends State<BookListPage> {
                                       currentBook.title!,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontWeight: FontWeight.w700),
                                     ),
                                     Text(
@@ -85,7 +92,7 @@ class _BookListPageState extends State<BookListPage> {
                                       alignment: Alignment.topRight,
                                       child: Text(
                                         currentBook.price!,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             color: Colors.green),
                                       ),
