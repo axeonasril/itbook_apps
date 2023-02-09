@@ -19,6 +19,7 @@ class BookController extends ChangeNotifier {
 
   BookDetailResponse? detailBook;
   fetchDetailBookApi(isbn) async {
+    detailBook = null;
     var url = Uri.parse('https://api.itbook.store/1.0/books/$isbn');
     var response = await http.get(url);
 

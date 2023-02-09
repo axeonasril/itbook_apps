@@ -32,10 +32,14 @@ class _DetailBookPageState extends State<DetailBookPage> {
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
         backgroundColor: Colors.blue[800],
-        title: const Text(
-          "DETAIL BOOK",
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
-        ),
+        title: Consumer<BookController>(builder: (context, controller, child) {
+          return controller.detailBook == null
+              ? Container()
+              : Text(
+                  controller.detailBook!.title!,
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+                );
+        }),
         centerTitle: true,
         actions: const [
           Icon(
